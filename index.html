@@ -1,0 +1,1166 @@
+<!DOCTYPE html>
+<html lang="pt-BR" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PROFEPLAN V4 - Documentação Oficial</title>
+  <!-- Google Fonts: Inter e Outfit -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <!-- Marked.js para renderizar Markdown -->
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <style>
+    /* Reset & Base Styles */
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    
+    :root {
+      --bg-primary: #0f172a; /* Slate 900 */
+      --bg-secondary: #0b0f19; /* Darker Slate */
+      --bg-card: #1e293b; /* Slate 800 */
+      --text-main: #f8fafc; /* Slate 50 */
+      --text-muted: #94a3b8; /* Slate 400 */
+      --accent: #38bdf8; /* Sky 400 (Azul Claro) */
+      --accent-deep: #1d4ed8; /* Blue 700 */
+      --border-color: #334155; /* Slate 700 */
+      --font-ui: 'Inter', sans-serif;
+      --font-doc: 'Outfit', sans-serif;
+    }
+
+    body {
+      background-color: var(--bg-primary);
+      color: var(--text-main);
+      font-family: var(--font-ui);
+      display: flex;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    /* Layout structure */
+    #sidebar {
+      width: 320px;
+      background-color: var(--bg-secondary);
+      border-right: 1px solid var(--border-color);
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+      flex-shrink: 0;
+      transition: all 0.3s ease;
+    }
+
+    #main-content {
+      flex-grow: 1;
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+      overflow: hidden;
+      background: radial-gradient(circle at 80% 20%, #1e293b 0%, var(--bg-primary) 70%);
+    }
+
+    /* Sidebar Header & Search */
+    .sidebar-header {
+      padding: 24px;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .brand-title {
+      font-family: var(--font-doc);
+      font-size: 22px;
+      font-weight: 800;
+      letter-spacing: 0.5px;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .brand-title span {
+      color: var(--accent);
+    }
+
+    .brand-subtitle {
+      font-size: 11px;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      margin-top: 4px;
+    }
+
+    .search-container {
+      margin-top: 16px;
+      position: relative;
+    }
+
+    .search-input {
+      width: 100%;
+      background-color: var(--bg-primary);
+      border: 1px solid var(--border-color);
+      color: var(--text-main);
+      padding: 10px 14px;
+      padding-left: 36px;
+      border-radius: 8px;
+      font-size: 13px;
+      outline: none;
+      transition: all 0.2s ease;
+    }
+
+    .search-input:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 2px rgba(56, 189, 248, 0.2);
+    }
+
+    .search-icon {
+      position: absolute;
+      left: 12px;
+      top: 52%;
+      transform: translateY(-50%);
+      color: var(--text-muted);
+      pointer-events: none;
+    }
+
+    /* Sidebar Navigation Menu */
+    .menu-container {
+      flex-grow: 1;
+      overflow-y: auto;
+      padding: 16px;
+    }
+
+    .menu-section {
+      margin-bottom: 20px;
+    }
+
+    .menu-section-title {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      color: var(--text-muted);
+      margin-bottom: 8px;
+      padding-left: 8px;
+      font-weight: 700;
+    }
+
+    .menu-list {
+      list-style: none;
+    }
+
+    .menu-item {
+      padding: 8px 12px;
+      border-radius: 6px;
+      font-size: 13px;
+      cursor: pointer;
+      color: var(--text-muted);
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .menu-item:hover {
+      background-color: rgba(255, 255, 255, 0.05);
+      color: #fff;
+    }
+
+    .menu-item.active {
+      background-color: rgba(56, 189, 248, 0.15);
+      color: var(--accent);
+      font-weight: 500;
+      border-left: 3px solid var(--accent);
+      border-top-left-radius: 0;
+      border-bottom-left-radius: 0;
+    }
+
+    /* Reading area */
+    .content-header {
+      padding: 16px 40px;
+      border-bottom: 1px solid var(--border-color);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background-color: rgba(15, 23, 42, 0.4);
+      backdrop-filter: blur(8px);
+    }
+
+    .file-path {
+      font-size: 13px;
+      color: var(--text-muted);
+      font-family: monospace;
+    }
+
+    .reader-area {
+      flex-grow: 1;
+      overflow-y: auto;
+      padding: 40px;
+      display: flex;
+      justify-content: center;
+    }
+
+    .article-container {
+      width: 100%;
+      max-width: 800px;
+      animation: fadeIn 0.3s ease;
+    }
+
+    /* Markdown styling (Premium typography) */
+    .doc-content {
+      font-family: var(--font-doc);
+      font-size: 16px;
+      line-height: 1.7;
+      color: #cbd5e1; /* Slate 300 */
+    }
+
+    .doc-content h1 {
+      font-size: 32px;
+      color: #fff;
+      margin-bottom: 24px;
+      font-weight: 800;
+      border-bottom: 1px solid var(--border-color);
+      padding-bottom: 12px;
+      margin-top: 16px;
+    }
+
+    .doc-content h2 {
+      font-size: 22px;
+      color: var(--accent);
+      margin-top: 32px;
+      margin-bottom: 16px;
+      font-weight: 600;
+    }
+
+    .doc-content h3 {
+      font-size: 18px;
+      color: #fff;
+      margin-top: 24px;
+      margin-bottom: 12px;
+      font-weight: 600;
+    }
+
+    .doc-content p {
+      margin-bottom: 16px;
+    }
+
+    .doc-content ul {
+      margin-left: 24px;
+      margin-bottom: 16px;
+    }
+
+    .doc-content li {
+      margin-bottom: 8px;
+    }
+
+    .doc-content hr {
+      border: 0;
+      height: 1px;
+      background: var(--border-color);
+      margin: 32px 0;
+    }
+
+    .doc-content pre {
+      background-color: var(--bg-secondary);
+      border: 1px solid var(--border-color);
+      padding: 16px;
+      border-radius: 8px;
+      overflow-x: auto;
+      font-family: monospace;
+      font-size: 14px;
+      margin-bottom: 20px;
+      color: #e2e8f0;
+    }
+
+    .doc-content code {
+      font-family: monospace;
+      background-color: rgba(255, 255, 255, 0.1);
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-size: 14px;
+      color: #f472b6; /* Pink accent */
+    }
+
+    .doc-content pre code {
+      background-color: transparent;
+      padding: 0;
+      color: inherit;
+    }
+
+    .doc-content table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 24px;
+    }
+
+    .doc-content th, .doc-content td {
+      border: 1px solid var(--border-color);
+      padding: 12px;
+      text-align: left;
+    }
+
+    .doc-content th {
+      background-color: var(--bg-card);
+      font-weight: 600;
+    }
+
+    /* Alerts */
+    .doc-content blockquote {
+      border-left: 4px solid var(--accent);
+      background-color: rgba(56, 189, 248, 0.05);
+      padding: 12px 20px;
+      margin-bottom: 20px;
+      border-radius: 0 8px 8px 0;
+    }
+
+    .doc-content blockquote p {
+      margin-bottom: 0;
+      color: #fff;
+    }
+
+    /* Scrollbar */
+    ::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: var(--bg-secondary);
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: var(--border-color);
+      border-radius: 4px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: var(--text-muted);
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Sidebar -->
+  <aside id="sidebar">
+    <div class="sidebar-header">
+      <div class="brand-title">PROFEPLAN <span>V4</span></div>
+      <div class="brand-subtitle">Blueprint Hub</div>
+      <div class="search-container">
+        <span class="search-icon">🔍</span>
+        <input type="text" id="search-bar" class="search-input" placeholder="Pesquisar documentação...">
+      </div>
+    </div>
+    <div class="menu-container" id="menu-list-container">
+      <!-- Menu generated via JS -->
+    </div>
+  </aside>
+
+  <!-- Main Content Reader -->
+  <main id="main-content">
+    <div class="content-header">
+      <div class="file-path" id="current-file-path">INDEX.md</div>
+      <div>
+        <!-- Aesthetic theme/app label -->
+        <span style="font-size: 11px; font-weight: 600; background: var(--accent-deep); padding: 4px 10px; border-radius: 20px; text-transform: uppercase; letter-spacing: 0.5px;">V4.0 Baseline</span>
+      </div>
+    </div>
+    <div class="reader-area">
+      <div class="article-container">
+        <article class="doc-content" id="render-target">
+          <!-- Markdown content rendered here -->
+        </article>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    // Embedded Markdown Database
+    const docDatabase = {
+      "INDEX": {
+        title: "Índice Principal",
+        path: "docs/blueprint/INDEX.md",
+        category: "00_VISION",
+        content: `# PROFEPLAN V4
+## Documentation Index
+
+Versão: 4.0
+
+Status:
+Official Documentation Hub (V4 Legacy Baseline)
+
+Última Atualização:
+Fevereiro/2026
+
+Empresa:
+WR TECH AI
+
+Produto:
+PROFEPLAN (V4)
+
+---
+
+# VISÃO GERAL
+
+O PROFEPLAN V4 é um ecossistema SaaS de Inteligência Artificial voltado para a educação básica. Seu objetivo é eliminar a sobrecarga burocrática dos professores através da geração automatizada de planos de aula, avaliações e adaptações curriculares (PDI), com alinhamento rigoroso à Base Nacional Comum Curricular (BNCC) e ao Programa Nacional do Livro e do Material Didático (PNLD).
+
+A arquitetura do PROFEPLAN V4 segue uma filosofia "Holding Industrial", com separação rigorosa entre processamento de dados offline em pipelines Python (As Indústrias) e a interface do usuário em React/Capacitor (A Loja).
+
+---
+
+# MISSÃO
+
+Devolver tempo aos professores.`
+      },
+      "VISION": {
+        title: "Visão Estratégica",
+        path: "docs/blueprint/00_VISION/VISION.md",
+        category: "00_VISION",
+        content: `# VISION.md
+# PROFEPLAN V4
+## Visão Estratégica da Versão 4.0
+
+Versão: 4.0
+Status: Documento Fundacional
+Última Atualização: Fevereiro/2026
+
+---
+
+# 1. INTRODUÇÃO
+
+A sobrecarga de trabalho administrativo e burocrático afeta a saúde mental e a eficácia de professores em todo o Brasil.
+
+O PROFEPLAN V4 foi projetado para combater diretamente esse problema, fornecendo ferramentas de inteligência pedagógica automatizada.
+
+O sistema gera planos de aula, avaliações inéditas e planos de desenvolvimento individual (PDI) alinhados aos marcos regulatórios em minutos.
+
+---
+
+# 2. NOSSA CRENÇA
+
+Acreditamos que a inteligência artificial generativa deve ser uma aliada do professor, ampliando suas capacidades sem tentar substituí-lo.
+
+O educador permanece no centro do processo decisório, controlando parâmetros, insumos e revisando as saídas antes da aplicação final.
+
+---
+
+# 3. O PROBLEMA
+
+Professores sofrem com:
+
+* Tempo excessivo dedicado a relatórios administrativos.
+* Elaboração de adaptações curriculares (PDI) sem diretrizes estruturadas.
+* Falta de alinhamento prático à BNCC e aos livros didáticos do PNLD.
+* Falta de ferramentas que integrem a voz e a mobilidade no dia a dia da sala de aula.`
+      },
+      "DECISION_LOG": {
+        title: "Decision Log (ADRs)",
+        path: "docs/blueprint/00_VISION/DECISION_LOG.md",
+        category: "00_VISION",
+        content: `# DECISION_LOG.md
+# PROFEPLAN V4
+## Registro de Decisões Estratégicas e Arquiteturais
+
+Versão: 4.0
+Status: Ativo
+
+---
+
+# ADR 001: Arquitetura de IA Separada (Azure vs Gemini)
+
+## Status
+Aprovado
+
+## Contexto
+O banco de dados Supabase necessita de embeddings estruturados para busca vetorial. Usar modelos da Azure para embeddings e armazenamento vetorial geraria incompatibilidades com os dados originais no Supabase pgvector(768).
+
+## Decisão
+Implementamos uma divisão rígida na arquitetura de IA:
+1. **Azure OpenAI:** Responsável pela geração de texto rica (planos, PDI, chat, avaliações) centralizada no AiCore.
+2. **Google Gemini (text-embedding-004):** Responsável estritamente pela geração de vetores de 768 dimensões para busca de similaridade e RAG no banco de dados.
+
+---
+
+# ADR 002: Filosofia de Divisão "Holding Industrial"
+
+## Status
+Aprovado
+
+## Contexto
+O processamento e extração de PDFs caóticos do PNLD e currículos escolares exigem alto processamento de CPU e memória, o que sobrecarrega a experiência direta do usuário caso rodasse na mesma aplicação frontend/backend do cliente.
+
+## Decisão
+Dividimos o ecossistema em duas macro-camadas:
+1. **As Indústrias (Offline):** Pipelines de processamento pesado em Python (ProfeplanHub, Codex, Coletor, Packages) que tratam PDFs, extraem dados e alimentam o banco de forma isolada.
+2. **A Loja (Online):** O Web App React e o app móvel Android que apenas consomem esses dados processados e estruturados, provendo alta fluidez e baixo consumo de recursos client-side.`
+      },
+      "PRD_V4": {
+        title: "Product Specs (PRD)",
+        path: "docs/blueprint/01_PRODUCT/PRD_V4.md",
+        category: "01_PRODUCT",
+        content: `# PRD_V4.md
+# PROFEPLAN V4
+## Product Requirements Document - V4 Core
+
+Versão: 4.0
+Status: Ativo
+Última Atualização: Fevereiro/2026
+
+---
+
+# Módulos Funcionais do Sistema
+
+---
+
+## Módulo 1: Configurações, Onboarding e Perfil Profissional
+
+### 1.1 Regra de Primeiro Acesso (Bloqueante)
+Se o usuário logado tiver dados de perfil incompletos, a navegação é interceptada e o modal "Configurações > Perfil e Preferências" abre automaticamente. Geração de planos é travada até o preenchimento.
+
+### 1.2 Dados do Perfil e Vínculo Institucional
+Campos obrigatórios: Nome Completo, E-mail Institucional, MASP / Matrícula. Suporte a vínculos múltiplos em diferentes escolas.
+
+### 1.3 Busca de Escolas e Regra do INEP
+Autocompletar busca escolas pré-cadastradas preenchendo Cidade e Código INEP. Se digitado manualmente, Código INEP fica nulo e a nova escola não é registrada na tabela global, evitando poluição.
+
+---
+
+## Módulo 2: Minhas Turmas e Gestão de Alunos
+
+### 2.1 Criação de Turmas via PDF
+Upload de PDF de Relação Nominal de Alunos. Parser extrai código da escola, identificação da turma, ano letivo, turno e disciplina.
+
+### 2.2 Extração Nominal de Alunos
+Cadastro automático separando: Seq (número da chamada), Código (matrícula) e Nome Completo.
+
+### 2.3 Campo "Observações" e Gatilho do PDI
+Campo de texto ao lado do nome do aluno para observações de inclusão (laudos de TDAH, TEA, etc). Se preenchido, ativa o vínculo com o módulo PDI.`
+      },
+      "ROADMAP_V4": {
+        title: "Roadmap V4.x",
+        path: "docs/blueprint/01_PRODUCT/ROADMAP_V4.md",
+        category: "01_PRODUCT",
+        content: `# ROADMAP_V4.md
+# PROFEPLAN V4
+## Histórico Evolutivo e Baseline de Desenvolvimento
+
+Versão: 4.0
+Status: Concluído
+Última Atualização: Fevereiro/2026
+
+---
+
+# Fases do Ciclo de Vida V4.x
+
+---
+
+## Fase 1: Fundação e RAG Local (Q1-Q2 2025)
+
+* Implementação do banco de dados relacional Supabase.
+* Configuração da extensão pgvector para armazenamento de embeddings do Gemini.
+* Criação das primeiras pipelines de raspagem de currículos estaduais (Minas Gerais).
+* Lançamento do gerador de planos de aula diários integrados à BNCC.
+
+---
+
+## Fase 2: Normalização PNLD e PDF Parser (Q3 2025)
+
+* Criação da pipeline **Codex** e do **Coletor** para ingestão estruturada de livros didáticos PNLD de variadas editoras.
+* Lançamento do recurso de importação de turmas através do PDF nominal de alunos (SIMADE).
+* Estruturação da tabela de alunos e campos de laudos pedagógicos para educação especial.`
+      },
+      "FRONTEND": {
+        title: "Arquitetura Frontend",
+        path: "docs/blueprint/02_ARCHITECTURE/FRONTEND.md",
+        category: "02_ARCHITECTURE",
+        content: `# FRONTEND.md
+# PROFEPLAN V4
+## Frontend Architecture (A Loja)
+
+Versão: 4.0
+Status: Ativo
+Última Atualização: Fevereiro/2026
+
+---
+
+# 1. VISÃO GERAL
+
+O frontend da V4.0 (conhecido na arquitetura "Holding Industrial" como "A Loja") é projetado para ser uma interface extremamente rápida, fluida e focada no professor.
+
+Seu principal papel é capturar as intenções do usuário (parâmetros de turmas, seleções de habilidades, comandos de voz) e exibir os resultados processados de maneira limpa.
+
+---
+
+# 2. STACK TECNOLÓGICO
+
+* **Framework Core:** React 18
+* **Linguagem:** TypeScript
+* **Build tool:** Vite
+* **Estilização:** TailwindCSS v4
+* **Roteamento:** React Router v6
+* **Mobile Wrap:** Capacitor (para envelopamento nativo Android)`
+      },
+      "BACKEND": {
+        title: "Arquitetura Backend",
+        path: "docs/blueprint/02_ARCHITECTURE/BACKEND.md",
+        category: "02_ARCHITECTURE",
+        content: `# BACKEND.md
+# PROFEPLAN V4
+## Backend Architecture (As Indústrias)
+
+Versão: 4.0
+Status: Ativo
+Última Atualização: Fevereiro/2026
+
+---
+
+# 1. VISÃO GERAL
+
+O backend da V4.0 é composto por um conjunto de pipelines robustos de processamento de dados e microsserviços em Python, denominados na filosofia da plataforma como "As Indústrias".
+
+Ele cuida de tarefas pesadas que seriam inviáveis no lado do cliente: extração estruturada de PDFs de currículos, normalização de livros do PNLD, renderização de documentos PDF complexos no servidor e orquestração de múltiplos agentes de inteligência artificial.
+
+---
+
+# 2. ESTRUTURA DOS COMPONENTES
+
+## 2.1 ProfeplanHub
+Pipeline integrado de processamento de dados que unifica a extração e indexação de dados educacionais de livros do PNLD.`
+      },
+      "DATABASE": {
+        title: "Arquitetura Banco de Dados",
+        path: "docs/blueprint/02_ARCHITECTURE/DATABASE.md",
+        category: "02_ARCHITECTURE",
+        content: `# DATABASE.md
+# PROFEPLAN V4
+## Database Architecture & Schema
+
+Versão: 4.0
+Status: Ativo
+Última Atualização: Fevereiro/2026
+
+Banco de Dados: Supabase (PostgreSQL 15)
+Extensões: pgvector, uuid-ossp, pgcrypto
+
+---
+
+# 1. VISÃO GERAL
+
+O banco de dados do PROFEPLAN V4 é centralizado no Supabase. Ele implementa o isolamento de dados do professor por meio de diretrizes rígidas de Row Level Security (RLS) do PostgreSQL, garantindo a privacidade e a segurança exigidas pela LGPD.
+
+Além de persistir dados transacionais simples, ele armazena os embeddings vetoriais de 768 dimensões usados no RAG da plataforma.
+
+---
+
+# 2. HIERARQUIA RELACIONAL OBRIGATÓRIA
+
+```text
+Escola (Código INEP)
+  └── Professor
+        └── Turma (classes)
+              ├── Aluno (students) ↔ Observações Pedagógicas (Inclusão)
+              └── Disciplina
+````
+      },
+      "AI_LAYER": {
+        title: "Arquitetura Camada IA",
+        path: "docs/blueprint/02_ARCHITECTURE/AI_LAYER.md",
+        category: "02_ARCHITECTURE",
+        content: `# AI_LAYER.md
+# PROFEPLAN V4
+## AI Layer Architecture
+
+Versão: 4.0
+Status: Ativo
+Última Atualização: Fevereiro/2026
+
+---
+
+# 1. VISÃO GERAL
+
+A camada de inteligência artificial do PROFEPLAN V4 é baseada em uma arquitetura híbrida de múltiplos provedores de modelos fundacionais.
+
+Esta divisão otimiza os custos e o tempo de resposta, além de garantir a estabilidade relacional do banco de dados vetorial.
+
+---
+
+# 2. FLUXO HÍBRIDO DE MODELOS
+
+```text
+       [ AÇÃO DO PROFESSOR ]
+                 │
+        ┌────────┴────────┐
+        ▼                 ▼
+  [ Busca/RAG ]     [ Geração Texto/PDI ]
+        │                 │
+  Google Gemini     Azure OpenAI
+  text-embedding-   gpt-4o / gpt-35-turbo
+  004 (768 dims)          │
+        │                 ▼
+        ▼           [ Retorno do Texto ]
+  [ Supabase pgvector ]
+````
+      },
+      "AI_GOVERNANCE": {
+        title: "Governança & Guardrails IA",
+        path: "docs/blueprint/02_ARCHITECTURE/AI_GOVERNANCE.md",
+        category: "02_ARCHITECTURE",
+        content: `# AI_GOVERNANCE.md
+# PROFEPLAN V4
+## AI Governance & Guardrails
+
+Versão: 4.0
+Status: Ativo
+Última Atualização: Fevereiro/2026
+
+---
+
+# 1. VISÃO GERAL
+
+A inteligência artificial aplicada à educação básica deve seguir princípios éticos rígidos e conformidade legal rigorosa.
+
+O PROFEPLAN V4 implementa barreiras de segurança ativa (guardrails) e regras éticas para evitar alucinações de códigos escolares e proteger a privacidade do estudante.
+
+---
+
+# 2. DIRETRIZES ÉTICAS E DE PRIVACIDADE
+
+## Proteção e Privacidade (Não-Exposição do Aluno)
+Nas adaptações de PDI e DUA, a IA está terminantemente proibida de citar explicitamente o termo clínico, diagnóstico, transtorno ou deficiência do estudante no título ou corpo das atividades propostas.
+
+O foco deve ser 100% na estratégia pedagógica de acessibilidade e adaptação metodológica (ex: maior espaçamento de linhas, uso de recursos visuais, tempos diferenciados). Isso previne a rotulação e a exposição desnecessária caso terceiros leiam o material impresso.`
+      },
+      "SECURITY": {
+        title: "Políticas de Segurança",
+        path: "docs/blueprint/02_ARCHITECTURE/SECURITY.md",
+        category: "02_ARCHITECTURE",
+        content: `# SECURITY.md
+# PROFEPLAN V4
+## Security & Privacy Architecture
+
+Versão: 4.0
+Status: Ativo
+Última Atualização: Fevereiro/2026
+
+---
+
+# 1. SEGURANÇA DE DADOS (LGPD)
+
+O PROFEPLAN lida com dados confidenciais de professores e de estudantes da educação básica brasileira (incluindo laudos e observações de necessidades especiais).
+
+Para garantir conformidade com a Lei Geral de Proteção de Dados (LGPD):
+* Criptografia AES-256 aplicada no banco de dados para campos sensíveis.
+* Row Level Security (RLS) no Supabase, garantindo que um professor só consiga visualizar e gerenciar registros vinculados à sua própria conta e às suas turmas.`
+      },
+      "OMNICHANNEL": {
+        title: "Arquitetura Omnichannel",
+        path: "docs/blueprint/02_ARCHITECTURE/OMNICHANNEL.md",
+        category: "02_ARCHITECTURE",
+        content: `# OMNICHANNEL.md
+# PROFEPLAN V4
+## Omnichannel Architecture
+
+Versão: 4.0
+Status: Ativo
+Última Atualização: Fevereiro/2026
+
+---
+
+# 1. VISÃO GERAL
+
+O PROFEPLAN V4 foi projetado para atuar nos canais onde o professor executa suas atividades pedagógicas no dia a dia: no computador da escola e no smartphone.
+
+A arquitetura garante sincronização em tempo real e portabilidade dos recursos em diferentes telas.
+
+---
+
+# 2. CANAIS DA VERSÃO 4.0
+
+## 2.1 Web App (Desktop)
+Interface completa voltada para tarefas de grande porte que exigem foco, como elaboração de planejamentos trimestrais completos, gestão de turmas e exportação de avaliações.`
+      },
+      "AGENTS_CATALOG": {
+        title: "Catálogo de Agentes IA",
+        path: "docs/blueprint/02_ARCHITECTURE/AGENTS_CATALOG.md",
+        category: "02_ARCHITECTURE",
+        content: `# AGENTS_CATALOG.md
+# PROFEPLAN V4
+## Catalog of Autonomous Agents
+
+Versão: 4.0
+Status: Ativo
+Última Atualização: Fevereiro/2026
+
+---
+
+# 1. VISÃO GERAL
+
+O ecossistema do PROFEPLAN V4 utiliza agentes de inteligência artificial autônomos e focados em tarefas específicas.
+
+Estes agentes orquestram buscas, validam regras curriculares e interagem diretamente com o usuário por voz ou texto.
+
+---
+
+# 2. CATÁLOGO DOS AGENTES V4
+
+## 2.1 Agente Pedagogo (Core)
+Responsável por estruturar a escrita dos planejamentos de aula e avaliações. Ele combina as preferências de estilo do professor, as habilidades da BNCC e o histórico de aulas anteriores no prompt final para a Azure OpenAI.`
+      },
+      "INTEGRATIONS": {
+        title: "Protocolos & Integrações",
+        path: "docs/blueprint/02_ARCHITECTURE/INTEGRATIONS.md",
+        category: "02_ARCHITECTURE",
+        content: `# INTEGRATIONS.md
+# PROFEPLAN V4
+## Integrations & Protocols
+
+Versão: 4.0
+Status: Ativo
+Última Atualização: Fevereiro/2026
+
+---
+
+# 1. VISÃO GERAL
+
+O PROFEPLAN V4 integra fontes de dados governamentais e de mercado para acelerar o fluxo de planejamento e garantir a autenticidade dos dados pedagógicos.
+
+---
+
+# 2. PROTOCOLO HANDSHAKE
+
+O **Handshake Protocol** (especificado no arquivo `HANDSHAKE_PROTOCOL.md` do repositório) define a comunicação de segurança e sincronização entre "As Indústrias" (Python) e "A Loja" (React/TS).`
+      },
+      "DESIGN_SYSTEM": {
+        title: "Princípios Design System",
+        path: "docs/blueprint/03_DESIGN/DESIGN_SYSTEM.md",
+        category: "03_DESIGN",
+        content: `# DESIGN_SYSTEM.md
+# PROFEPLAN V4
+## Design System Principles
+
+Versão: 4.0
+Status: Ativo
+Última Atualização: Fevereiro/2026
+
+---
+
+# 1. VISÃO GERAL
+
+O sistema de design do PROFEPLAN V4 é projetado para oferecer uma experiência de leitura limpa e de baixo cansaço visual, considerando que professores passam horas planejando aulas e corrigindo trabalhos na plataforma.
+
+A estilização utiliza classes utilitárias do TailwindCSS de forma semântica.`
+      },
+      "TOKENS": {
+        title: "Design Tokens",
+        path: "docs/blueprint/03_DESIGN/TOKENS.md",
+        category: "03_DESIGN",
+        content: `# TOKENS.md
+# PROFEPLAN V4
+## Visual Design Tokens
+
+Versão: 4.0
+Status: Ativo
+Última Atualização: Fevereiro/2026
+
+---
+
+# 1. PALETA DE CORES SEMÂNTICA
+
+A paleta de cores do PROFEPLAN V4 foi desenhada para passar credibilidade, organização e tranquilidade ao ambiente escolar.
+
+---
+
+## 1.1 Cores Primárias (Marca)
+* **Brand Primary:** `#1e3a8a` (Azul Escuro Real) - Representa o conhecimento institucional e estabilidade.
+* **Brand Secondary:** `#0284c7` (Azul Claro Educacional) - Usado para destaques, botões de ação secundários e links.`
+      },
+      "UX_GUIDELINES": {
+        title: "UX Guidelines",
+        path: "docs/blueprint/03_DESIGN/UX_GUIDELINES.md",
+        category: "03_DESIGN",
+        content: `# UX_GUIDELINES.md
+# PROFEPLAN V4
+## User Experience Guidelines
+
+Versão: 4.0
+Status: Ativo
+Última Atualização: Fevereiro/2026
+
+---
+
+# 1. FOCO NO PROFESSOR
+
+Os fluxos do PROFEPLAN V4 priorizam o imediatismo. O professor deve ser capaz de concluir tarefas comuns com a menor quantidade de cliques possível.`
+      },
+      "MASTER_BACKLOG": {
+        title: "Master Backlog",
+        path: "docs/blueprint/04_EXECUTION/MASTER_BACKLOG.md",
+        category: "04_EXECUTION",
+        content: `# MASTER_BACKLOG.md
+# PROFEPLAN V4
+## Master Backlog
+
+Versão: 4.0
+Status: Ativo (Manutenção de Baseline)
+Última Atualização: Fevereiro/2026
+
+---
+
+# 1. ATIVIDADES CONCLUÍDAS
+
+* **[CORE]** Integração do backend em Python com o Supabase Client.
+* **[RAG]** Normalização de vetores de 768 dimensões usando `text-embedding-004`.
+* **[IMPOR]** Leitor de PDF do SIMADE para cadastro automático de alunos e turmas.`
+      },
+      "RELEASE_PLAN": {
+        title: "Releases Plan",
+        path: "docs/blueprint/04_EXECUTION/RELEASE_PLAN.md",
+        category: "04_EXECUTION",
+        content: `# RELEASE_PLAN.md
+# PROFEPLAN V4
+## Release Plan
+
+Versão: 4.0
+Status: Ativo
+Última Atualização: Fevereiro/2026
+
+---
+
+# 1. VERSÕES CONSOLIDADAS (V4.x)
+
+---
+
+## Versão 4.0.0 (Fevereiro/2026)
+* Lançamento oficial do ecossistema unificado "Holding Industrial".
+* Integração final do assistente de voz FREEDAY na interface web e mobile Capacitor.
+* Homologação do RAG Híbrido com embeddings do Gemini no Supabase.`
+      },
+      "TECHNICAL_DEBT": {
+        title: "Código Morto & Débitos",
+        path: "docs/blueprint/04_EXECUTION/TECHNICAL_DEBT.md",
+        category: "04_EXECUTION",
+        content: `# TECHNICAL_DEBT.md
+# PROFEPLAN V4
+## Technical Debt & Code Deadweight
+
+Versão: 4.0
+Status: Ativo
+Última Atualização: Fevereiro/2026
+
+---
+
+# 1. VISÃO GERAL
+
+O desenvolvimento acelerado da V4 do PROFEPLAN resultou em redundâncias no código-fonte, módulos legados não utilizados e dependências desatualizadas.
+
+Este documento cataloga a dívida técnica mapeada para saneamento imediato antes da migração para a V5.`
+      },
+      "DOCUMENT_AUDIT": {
+        title: "Auditoria & INPI",
+        path: "docs/blueprint/04_EXECUTION/DOCUMENT_AUDIT.md",
+        category: "04_EXECUTION",
+        content: `# DOCUMENT_AUDIT.md
+# PROFEPLAN V4
+## Repository & Code Archeology Audit
+
+Versão: 4.0
+Status: Ativo
+Última Atualização: Fevereiro/2026
+
+---
+
+# 1. VISÃO GERAL
+
+O PROFEPLAN V4 passou por auditorias detalhadas do código-fonte para preparar o registro oficial do software junto ao INPI (Instituto Nacional da Propriedade Industrial) e assegurar a propriedade intelectual do código proprietário.
+
+Este documento sumariza a integridade dos artefatos do repositório.`
+      },
+      "KPIS": {
+        title: "Score & KPIs Operacionais",
+        path: "docs/blueprint/04_EXECUTION/KPIS.md",
+        category: "04_EXECUTION",
+        content: `# KPIS.md
+# PROFEPLAN V4
+## Operational Key Performance Indicators
+
+Versão: 4.0
+Status: Ativo
+Última Atualização: Fevereiro/2026
+
+---
+
+# 1. VISÃO GERAL
+
+O sucesso do PROFEPLAN V4 baseia-se na entrega de valor mensurável para os professores e escolas. A governança do sistema monitora ativamente indicadores de velocidade, qualidade e economia de tempo.
+
+---
+
+# 2. MÉTRICAS OPERACIONAIS DE NEGÓCIO
+
+## Horas Economizadas por Professor (North Star Metric)
+* **Objetivo:** Garantir que o professor economize pelo menos 4 horas semanais de trabalho burocrático utilizando o PROFEPLAN.`
+      },
+      "PITCH": {
+        title: "Pitch & Valor B2B",
+        path: "docs/blueprint/05_BUSINESS/PITCH.md",
+        category: "05_BUSINESS",
+        content: `# PITCH.md
+# PROFEPLAN V4
+## Business Pitch & Value Proposition
+
+Versão: 4.0
+Status: Ativo
+Última Atualização: Fevereiro/2026
+
+---
+
+# 1. VISÃO GERAL
+
+O PROFEPLAN resolve uma dor real que atinge quase 2,5 milhões de professores de educação básica no Brasil: o excesso de burocracia pedagógica.
+
+Ao devolver tempo aos professores, aumentamos a qualidade do ensino e reduzimos as taxas de burnout nas escolas públicas e particulares.`
+      },
+      "COMPETITORS": {
+        title: "Análise Competitiva",
+        path: "docs/blueprint/05_BUSINESS/COMPETITORS.md",
+        category: "05_BUSINESS",
+        content: `# COMPETITORS.md
+# PROFEPLAN V4
+## Competitor Analysis
+
+Versão: 4.0
+Status: Ativo
+Última Atualização: Fevereiro/2026
+
+---
+
+# 1. VISÃO GERAL
+
+O mercado de EdTechs voltadas para IA Generativa na América Latina cresceu substancialmente.
+
+O PROFEPLAN posiciona-se de maneira única no mercado brasileiro de educação básica por meio da sua especialização regulatória local.`
+      },
+      "STARTUPS_PROGRAMS": {
+        title: "Parcerias & Startups",
+        path: "docs/blueprint/05_BUSINESS/STARTUPS_PROGRAMS.md",
+        category: "05_BUSINESS",
+        content: `# STARTUPS_PROGRAMS.md
+# PROFEPLAN V4
+## Startups Programs & Partnerships
+
+Versão: 4.0
+Status: Ativo
+Última Atualização: Fevereiro/2026
+
+---
+
+# 1. VISÃO GERAL
+
+O PROFEPLAN V4 busca ativamente integrar-se com programas de startups promovidos por grandes provedores de infraestrutura de nuvem e inteligência artificial para obter créditos de computação e mentoria especializada.`
+      }
+    };
+
+    const categories = {
+      "00_VISION": { name: "00 Vision & Decisions", icon: "👁️" },
+      "01_PRODUCT": { name: "01 Product & Specs", icon: "📦" },
+      "02_ARCHITECTURE": { name: "02 Technical Architecture", icon: "⚙️" },
+      "03_DESIGN": { name: "03 Design System", icon: "🎨" },
+      "04_EXECUTION": { name: "04 Execution & Quality", icon: "🚀" },
+      "05_BUSINESS": { name: "05 Business & Market", icon: "💼" }
+    };
+
+    // DOM Elements
+    const menuListContainer = document.getElementById("menu-list-container");
+    const renderTarget = document.getElementById("render-target");
+    const currentFilePath = document.getElementById("current-file-path");
+    const searchBar = document.getElementById("search-bar");
+
+    // Initialize Menu
+    function renderMenu(filterTerm = "") {
+      menuListContainer.innerHTML = "";
+      
+      const grouped = {};
+      Object.keys(categories).forEach(cat => grouped[cat] = []);
+
+      Object.entries(docDatabase).forEach(([key, value]) => {
+        const matchesFilter = filterTerm === "" || 
+          value.title.toLowerCase().includes(filterTerm.toLowerCase()) || 
+          value.content.toLowerCase().includes(filterTerm.toLowerCase()) ||
+          value.path.toLowerCase().includes(filterTerm.toLowerCase());
+
+        if (matchesFilter) {
+          grouped[value.category].push({ key, ...value });
+        }
+      });
+
+      Object.entries(grouped).forEach(([catKey, items]) => {
+        if (items.length === 0) return;
+
+        const section = document.createElement("div");
+        section.className = "menu-section";
+
+        const title = document.createElement("div");
+        title.className = "menu-section-title";
+        title.innerText = `${categories[catKey].icon} ${categories[catKey].name}`;
+        section.appendChild(title);
+
+        const list = document.createElement("ul");
+        list.className = "menu-list";
+
+        items.forEach(item => {
+          const li = document.createElement("li");
+          li.className = "menu-item";
+          li.innerText = item.title;
+          li.setAttribute("data-key", item.key);
+          li.addEventListener("click", () => selectDoc(item.key));
+          
+          if (activeDocKey === item.key) {
+            li.classList.add("active");
+          }
+
+          list.appendChild(li);
+        });
+
+        section.appendChild(list);
+        menuListContainer.appendChild(section);
+      });
+    }
+
+    let activeDocKey = "INDEX";
+
+    function selectDoc(key) {
+      activeDocKey = key;
+      const doc = docDatabase[key];
+      
+      // Update sidebar state
+      document.querySelectorAll(".menu-item").forEach(item => {
+        item.classList.remove("active");
+        if (item.getAttribute("data-key") === key) {
+          item.classList.add("active");
+        }
+      });
+
+      // Render markdown content
+      currentFilePath.innerText = doc.path;
+      renderTarget.innerHTML = marked.parse(doc.content);
+      
+      // Scroll to top of the reading container
+      document.querySelector(".reader-area").scrollTop = 0;
+    }
+
+    // Live search listener
+    searchBar.addEventListener("input", (e) => {
+      renderMenu(e.target.value);
+    });
+
+    // Start App
+    renderMenu();
+    selectDoc("INDEX");
+  </script>
+</body>
+</html>
