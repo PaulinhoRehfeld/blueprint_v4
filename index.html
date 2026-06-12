@@ -484,6 +484,10 @@ Implementamos uma divisão rígida na arquitetura de IA:
 1. **Azure OpenAI:** Responsável pela geração de texto rica (planos, PDI, chat, avaliações) centralizada no AiCore.
 2. **Google Gemini (text-embedding-004):** Responsável estritamente pela geração de vetores de 768 dimensões para busca de similaridade e RAG no banco de dados.
 
+## Consequências
+* Garantia de integridade das tabelas de vetores no Supabase.
+* Excelente performance de busca sem risco de crash no banco por dimensões incorretas de vetores.
+
 ---
 
 # ADR 002: Filosofia de Divisão "Holding Industrial"
@@ -497,7 +501,52 @@ O processamento e extração de PDFs caóticos do PNLD e currículos escolares e
 ## Decisão
 Dividimos o ecossistema em duas macro-camadas:
 1. **As Indústrias (Offline):** Pipelines de processamento pesado em Python (ProfeplanHub, Codex, Coletor, Packages) que tratam PDFs, extraem dados e alimentam o banco de forma isolada.
-2. **A Loja (Online):** O Web App React e o app móvel Android que apenas consomem esses dados processados e estruturados, provendo alta fluidez e baixo consumo de recursos client-side.`
+2. **A Loja (Online):** O Web App React e o app móvel Android que apenas consomem esses dados processados e estruturados, provendo alta fluidez e baixo consumo de recursos client-side.
+
+## Consequências
+* Separação de responsabilidades.
+* Interfaces rápidas e responsivas.
+* Escalabilidade horizontal simplificada.
+
+---
+
+# ADR 003: Hierarquia Estrita de Vínculos de Alunos e PDI
+
+## Status
+Aprovado
+
+## Contexto
+Refatorações anteriores simplificaram os dados de alunos em strings avulsas, quebrando a capacidade do professor de gerar PDIs consistentes baseados no perfil pedagógico de inclusão dos estudantes.
+
+## Decisão
+Tornou-se obrigatória a cadeia relacional estrita:
+\`Escola ↔ Professor ↔ Turma ↔ Aluno ↔ Disciplina\`.
+O cadastro do aluno deve registrar obrigatoriamente as condições de inclusão (ex: TEA, TDAH, Dislexia) e observações pedagógicas que servem de entrada automatizada (System Prompt) para as solicitações da IA no motor de PDI.
+
+## Consequências
+* Restauração da fidelidade do módulo de inclusão.
+* PDIs gerados com alto grau de acerto e personalização real.
+
+---
+
+# ADR 004: Hierarquia e Pesos de Consulta no RAG Pedagógico
+
+## Status
+Aprovado
+
+## Contexto
+A recuperação de informações curriculares genéricas provoca alucinações e desalinhamento de conteúdo com o planejamento local de cada professor. O sistema precisa priorizar rigorosamente as bases enviadas pelos próprios docentes.
+
+## Decisão
+Implementar uma regra de prioridade de consulta RAG baseada em pesos escalonados por categoria de documento:
+1. **Nível 1 (Plano de Curso Oficial):** Peso = 100
+2. **Nível 2 (Livros de Apoio):** Peso = 50
+3. **Nível 3 (Materiais Didáticos Gerais):** Peso = 30
+4. **Nível 4 (Base Geral do PROFEPLAN):** Peso = 10
+
+## Consequências
+* Redução brutal de conteúdos errados ou habilidades fora de época.
+* As respostas de IA alinham-se estritamente à realidade curricular de cada docente, transformando o PROFEPLAN em um assistente pedagógico hiper-personalizado.`
       },
       "PRD_V4": {
         title: "Product Specs (PRD)",
@@ -528,6 +577,12 @@ Campos obrigatórios: Nome Completo, E-mail Institucional, MASP / Matrícula. Su
 ### 1.3 Busca de Escolas e Regra do INEP
 Autocompletar busca escolas pré-cadastradas preenchendo Cidade e Código INEP. Se digitado manualmente, Código INEP fica nulo e a nova escola não é registrada na tabela global, evitando poluição.
 
+### 1.4 Personalização de Documentos (Exportação)
+Upload de logo (PNG/JPG) e textos para cabeçalhos/rodapés personalizados que sairão nos PDFs/DOCX gerados.
+
+### 1.5 Preferências de IA (System Prompt)
+Configuração do comportamento base da IA: metodologia ativa padrão, estilo pedagógico, foco avaliativo e tom de escrita.
+
 ---
 
 ## Módulo 2: Minhas Turmas e Gestão de Alunos
@@ -539,7 +594,148 @@ Upload de PDF de Relação Nominal de Alunos. Parser extrai código da escola, i
 Cadastro automático separando: Seq (número da chamada), Código (matrícula) e Nome Completo.
 
 ### 2.3 Campo "Observações" e Gatilho do PDI
-Campo de texto ao lado do nome do aluno para observações de inclusão (laudos de TDAH, TEA, etc). Se preenchido, ativa o vínculo com o módulo PDI.`
+Campo de texto ao lado do nome do aluno para observações de inclusão (laudos de TDAH, TEA, etc). Se preenchido, ativa o vínculo com o módulo PDI.
+
+### 2.4 Portabilidade
+Ao transferir o aluno de turma ou ano, o histórico completo (laudos, observações e PDIs) migra junto.
+
+---
+
+## Módulo 3: Planejamento Trimestral e Engenharia de Agentes Autônomos
+
+### 3.1 Arquitetura Multi-Agentes
+Operado por uma arquitetura avançada de Agentes Autônomos Orquestrados, que delegam tarefas (Agente RAG da BNCC, Agente PNLD) em loops contínuos até que o plano atenda aos parâmetros informados.
+
+### 3.2 Guardrails Estritos (Tolerância Zero a Alucinações)
+Fidelidade Documental: O agente está PROIBIDO de inventar currículos. Todo o planejamento deve ser gerado consultando ESTRITAMENTE os documentos oficiais na base de dados (BNCC).
+
+### 3.3 Integração Estrita com o Livro Didático (PNLD)
+Se o professor ativar "Utilizar Livro PNLD":
+* Livro na Base: O planejamento DEVE referenciar os capítulos e páginas específicas.
+* Livro Não Encontrado: O sistema usará a BNCC temporariamente e engatilhará um "Robô Autônomo de Busca" para encontrar o livro na internet e incorporá-lo à base futuramente.
+
+---
+
+## Módulo 4: Elaboração de Aulas Semanais e Diárias
+
+### 4.1 Regra de Ouro: Varredura de Contexto
+Antes de gerar qualquer aula, o Agente de IA DEVE realizar uma varredura completa em todo o Planejamento Trimestral. Ele não deve ler apenas o "título" da aula atual, mas analisar aulas passadas e futuras para garantir continuidade. Isso alinha aulas, materiais, atividades e avaliações.
+
+### 4.2 Parâmetros de Entrada e Contexto
+Dados base, vínculo escolar e um campo para observações/foco específico.
+
+### 4.3 A Chave de Alinhamento (Guardrail BNCC e PNLD)
+Se ativada, a IA busca Competências e Habilidades reais (PROIBIDO alucinar códigos).
+
+### 4.4 Estrutura Padronizada de Saída
+Cabeçalho, Habilidades BNCC, Objetivos, Recursos, Desenvolvimento (Introdução, Desenvolvimento e Fechamento) e Avaliação Diária.
+
+---
+
+## Módulo 5: Adaptações PDI/DUA (Inclusão e Acessibilidade)
+
+### 5.1 A Dependência Estrutural Crítica
+Para carregar o PDI, o sistema DEVE validar:
+1. Turmas Ativas.
+2. Filtro de Inclusão (lista APENAS alunos com observações preenchidas).
+3. Seletor de Contexto (qual Plano/Aula será adaptado).
+
+### 5.2 O Agente Especialista em DUA (Tripla Varredura)
+O Subagente de DUA executa:
+* Leitura do Perfil do Aluno (Observações).
+* Leitura do Plano de Aula original.
+* Busca na base (RAG) por diretrizes de inclusão.
+* Ação: Cruza as informações para gerar a estratégia.
+
+### 5.3 Guardrails de Ética e Privacidade
+Os documentos NUNCA devem expor o laudo clínico no título ou corpo do material do aluno. Foco 100% na estratégia pedagógica.
+
+---
+
+## Módulo 6: Simulados ENEM/Saeb (Banco de Dados Estático)
+
+### 6.1 O Banco de Dados de 17.000 Questões
+Tolerância zero para alucinações. Neste módulo, a IA atua exclusivamente como Bibliotecária. É PROIBIDO inventar ou alterar questões.
+
+### 6.2 Modos de Busca
+Busca manual (palavras-chave, código BNCC) ou Modo Espelho (IA busca no banco apenas questões que cobram as habilidades já ensinadas).
+
+### 6.3 Área de Trabalho e Pós-Processamento
+Seleção, balanceamento TRI, geração de versão A/B com gabarito embaralhado e exportação.
+
+---
+
+## Módulo 7: Avaliações Contextualizadas (Criação Inédita)
+
+### 7.1 Fonte da Verdade e Varredura
+IA gera questões inéditas baseada estritamente no Planejamento Trimestral e nos planos de aula aplicados.
+
+### 7.2 Controle Granular de Dificuldade
+Input granular de número exato de questões fáceis, médias e difíceis.
+
+### 7.3 Balanceamento Estatístico de Gabarito
+Respostas distribuídas aleatoriamente. Nenhuma alternativa correta pode ter predominância superior a 2 questões de diferença em relação às outras.
+
+### 7.4 Sistema Antifraude (Provas A / B / C)
+Embaralhamento das questões e alternativas, gerando gabarito mestre unificado.
+
+---
+
+## Módulo 8: Meus Arquivos e Gestão de Documentos
+
+### 8.1 Taxonomia e Nomenclatura Automática
+Fórmula obrigatória: \`[Tipo do Documento] [Número/Referência] - [Tema Específico] - [Disciplina]\`.
+
+### 8.2 Interface de Edição (Modo Foco)
+Ocultação de painéis ao editar, levando o professor para um editor de tela cheia.
+
+---
+
+## Módulo 9: FREEDAY - Agente Autônomo de Voz
+
+### 9.1 Omnipresença
+Botão global de acionamento fixo em todas as telas e abas.
+
+### 9.2 Interação Multimodal
+Speech-to-Text (STT) e Text-to-Speech (TTS) com leitura de documentos da tela em voz alta.
+
+### 9.3 Function Calling e Execução de Tarefas
+Agente de execução com controle sobre a interface (navegação, salvamento, exportação).
+
+### 9.4 Consciência de Contexto
+Injeção silenciosa do estado da tela atual para comandos relativos.
+
+---
+
+## Módulo 10: Gestão de Documentos Pessoais & Agentes Customizados
+
+### 10.1 Nova Área "Meus Documentos"
+Espaço dedicado onde o professor pode enviar arquivos PDF e associá-los a uma das três categorias de contextualização:
+* **Plano de Curso:** Documento normativo de maior prioridade.
+* **Livro:** Livro texto ou referencial de apoio.
+* **Material Didático:** Apostilas, slides, artigos e textos de apoio.
+
+### 10.2 Pipeline de Ingestão e Processamento
+O fluxo de processamento de novos arquivos segue o pipeline:
+\`Upload PDF ➔ Extração OCR/Text ➔ Conversão para Markdown ➔ Validação pelo Professor ➔ Base Oficial ➔ Agente Especializado\`.
+
+### 10.3 Versionamento de Documentos
+Toda atualização de documento não sobrescreve a versão anterior. O sistema cria e cataloga novas versões (\`V1\`, \`V2\`, \`V3\`) de forma transparente (ex: \`História 2026 V1\`, \`História 2026 V2\`).
+
+### 10.4 Painel de Aprovação de Markdown
+Para mitigar falhas comuns de OCR, o professor visualiza o Markdown bruto gerado e dispõe dos botões de aprovação ou reprocessamento.
+
+### 10.5 Extração Automatizada de Metadados e Score de Confiança
+Extração automática de metadados durante a ingestão (Disciplina, Ano, Carga Horária, Competências, Habilidades e Objetos de Conhecimento) e score de confiança. Se for menor que 80%, alerta de revisão manual.
+
+### 10.6 Agente de Curadoria Automática
+Curadoria assistida por IA secundária para apontar capítulos faltantes, tabelas quebradas ou quebras de formatação graves.
+
+### 10.7 Criação do Agente Especializado da Disciplina
+Após aprovação do Markdown oficial, o sistema ativa um Agente de IA específico (ex: \`Agent_Historia_1Ano_Paulinho\`) instanciado com o prompt de prioridade de plano de curso.
+
+### 10.8 Bloqueio Inteligente de Respostas Fora do Plano
+Se for solicitado temas não previstos no plano de curso oficial homologado, a IA intercepta a requisição e apresenta aviso de bloqueio inteligente com opção de continuar ou cancelar.`
       },
       "ROADMAP_V4": {
         title: "Roadmap V4.x",
@@ -704,7 +900,60 @@ Esta divisão otimiza os custos e o tempo de resposta, além de garantir a estab
         │                 ▼
         ▼           [ Retorno do Texto ]
   [ Supabase pgvector ]
-````
+```
+
+---
+
+# 3. COMPONENTES
+
+## 3.1 Geração de Conteúdo (Azure OpenAI)
+Responsável pelas tarefas generativas críticas que exigem formatação estrita, lógica educacional refinada e baixo tempo de resposta:
+* Planos de aula trimestrais, semanais e diários.
+* Geração de questões inéditas para avaliações.
+* Geração do Plano de Desenvolvimento Individual (PDI) com adaptação DUA.
+* Chat e interações com a assistente pedagógica.
+
+---
+
+## 3.2 Busca Semântica e RAG (Google Gemini)
+Responsável pelo pipeline de recuperação baseada em contexto (Retrieval-Augmented Generation):
+* **Modelo:** \`text-embedding-004\`.
+* **Saída:** Embeddings estáveis de 768 dimensões.
+* Indexação de materiais da BNCC e conteúdos do PNLD no banco Supabase.
+
+---
+
+## 3.3 Pipeline de Ingestão de Livros (Gemini 2.0 Flash)
+Utilizado de forma assíncrona ("Indústrias") para extrair texto bruto e metadados estruturados dos PDFs de livros pedagógicos enviados para a plataforma.
+
+---
+
+# 4. MOTOR DO PDI (INCLUSÃO)
+
+O prompt de geração enviado à Azure OpenAI no módulo PDI é dinâmico. O sistema intercepta a chamada de geração da aula, localiza o aluno selecionado no banco, puxa seus metadados de inclusão (laudos de autismo, TDAH, deficiências) do campo \`observations\` e concatena essas regras ao System Prompt.
+
+O modelo gera estratégias educacionais que cobrem a mesma habilidade da BNCC, mas modificam a abordagem pedagógica, ferramentas de avaliação e limites de tempo conforme a necessidade do estudante.
+
+---
+
+# 5. RAG HIERÁRQUICO PERSONALIZADO
+
+Para garantir fidelidade curricular absoluta, o PROFEPLAN V4 orquestra o Retrieval-Augmented Generation (RAG) em níveis estritos de prioridade. A consulta vetorial busca fragmentos nas tabelas de embeddings e aplica uma lógica de ranqueamento ponderada (pesos):
+
+## Níveis e Pesos de Prioridade
+1. **Nível 1 (Plano de Curso Oficial do Professor):** Peso = 100
+   * Fonte de verdade normativa principal. Impede que a IA invente habilidades ou ordens de conteúdo diferentes do planejamento estabelecido pelo professor para a turma.
+2. **Nível 2 (Livros Didáticos Associados):** Peso = 50
+   * Chunks extraídos dos livros do PNLD para referenciar páginas e capítulos de leitura recomendados.
+3. **Nível 3 (Materiais Didáticos de Enriquecimento):** Peso = 30
+   * Slides, apostilas e textos avulsos para complementar e dar exemplos práticos às atividades geradas.
+4. **Nível 4 (Base Geral do PROFEPLAN):** Peso = 10
+   * Referencial da BNCC 2018 e diretrizes educacionais gerais do sistema (último recurso).
+
+## Agente Temático por Disciplina
+Com base na categoria e no Plano de Curso aprovado, o sistema instancia um System Prompt otimizado para o agente da disciplina (ex: \`Agent_Historia_1Ano_Paulinho\`):
+\`"Você deve utilizar prioritariamente o plano de curso oficial desta disciplina."\`
+O RAG injeta no contexto as fatias de dados ordenadas pela soma ponderada dos pesos, filtrando qualquer conteúdo que divirja do planejamento do docente.`
       },
       "AI_GOVERNANCE": {
         title: "Governança & Guardrails IA",

@@ -62,3 +62,25 @@ O cadastro do aluno deve registrar obrigatoriamente as condições de inclusão 
 ## Consequências
 * Restauração da fidelidade do módulo de inclusão.
 * PDIs gerados com alto grau de acerto e personalização real.
+
+---
+
+# ADR 004: Hierarquia e Pesos de Consulta no RAG Pedagógico
+
+## Status
+Aprovado
+
+## Contexto
+A recuperação de informações curriculares genéricas provoca alucinações e desalinhamento de conteúdo com o planejamento local de cada professor. O sistema precisa priorizar rigorosamente as bases enviadas pelos próprios docentes.
+
+## Decisão
+Implementar uma regra de prioridade de consulta RAG baseada em pesos escalonados por categoria de documento:
+1. **Nível 1 (Plano de Curso Oficial):** Peso = 100
+2. **Nível 2 (Livros de Apoio):** Peso = 50
+3. **Nível 3 (Materiais Didáticos Gerais):** Peso = 30
+4. **Nível 4 (Base Geral do PROFEPLAN):** Peso = 10
+
+## Consequências
+* Redução brutal de conteúdos errados ou habilidades fora de época.
+* As respostas de IA alinham-se estritamente à realidade curricular de cada docente, transformando o PROFEPLAN em um assistente pedagógico hiper-personalizado.
+

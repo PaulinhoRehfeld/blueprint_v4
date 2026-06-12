@@ -142,3 +142,45 @@ O agente pode acionar telas e botões programaticamente (ex: "Exporte esta prova
 
 ### 9.4 Consciência de Contexto
 Injeção silenciosa do estado atual do professor (ex: qual tela/aluno está aberto) para permitir ordens relativas como "Refaça o segundo parágrafo".
+
+---
+
+## Módulo 10: Gestão de Documentos Pessoais & Agentes Customizados
+
+### 10.1 Nova Área "Meus Documentos"
+Espaço dedicado onde o professor pode enviar arquivos PDF e associá-los a uma das três categorias de contextualização:
+* **Plano de Curso:** Documento normativo de maior prioridade.
+* **Livro:** Livro texto ou referencial de apoio.
+* **Material Didático:** Apostilas, slides, artigos e textos de apoio.
+
+### 10.2 Pipeline de Ingestão e Processamento
+O fluxo de processamento de novos arquivos segue o pipeline:
+`Upload PDF ➔ Extração OCR/Text ➔ Conversão para Markdown ➔ Validação pelo Professor ➔ Base Oficial ➔ Agente Especializado`.
+
+* **Saída Gerada:** Um arquivo markdown estruturado (ex: `historia_1ano.md`) salvo com os metadados do professor, disciplina e prioridade do documento.
+
+### 10.3 Versionamento de Documentos
+Toda atualização de documento não sobrescreve a versão anterior. O sistema cria e cataloga novas versões (`V1`, `V2`, `V3`) de forma transparente (ex: `História 2026 V1`, `História 2026 V2`).
+
+### 10.4 Painel de Aprovação de Markdown
+Para mitigar falhas comuns de OCR em tabelas ou PDFs corrompidos, o professor visualiza o Markdown bruto gerado e dispõe dos botões:
+* **✓ Aprovar:** Homologa o documento para a base oficial de contexto.
+* **✗ Reprocessar:** Re-executa o parser com parâmetros ajustados.
+
+### 10.5 Extração Automatizada de Metadados e Score de Confiança
+* **Filtros Inteligentes:** Extração automática de metadados durante a ingestão (Disciplina, Ano, Carga Horária, Competências, Habilidades e Objetos de Conhecimento).
+* **Qualidade de Extração:** Exibição de um score de confiança em percentual. Se for menor que 80%, o sistema emite um alerta sugerindo revisão manual pelo professor.
+
+### 10.6 Agente de Curadoria Automática
+Processo de curadoria assistido por IA secundária para apontar capítulos faltantes, tabelas quebradas ou quebras de formatação graves, gerando um relatório sutil na tela de aprovação.
+
+### 10.7 Criação do Agente Especializado da Disciplina
+Após aprovação do Markdown oficial do plano de curso, o sistema ativa um Agente de IA específico para a turma e disciplina (ex: `Agent_Historia_1Ano_Paulinho`).
+Este agente é instanciado com o System Prompt:
+`"Você deve utilizar prioritariamente o plano de curso oficial desta disciplina."`
+
+### 10.8 Bloqueio Inteligente de Respostas Fora do Plano
+Caso o professor solicite a elaboração de conteúdos ou avaliações sobre temas não previstos no plano de curso oficial homologado, a IA intercepta a requisição e apresenta um aviso:
+`"Este tema não foi localizado no plano de curso oficial. Deseja continuar mesmo assim?"`
+Com os botões: **Continuar** ou **Cancelar**.
+
